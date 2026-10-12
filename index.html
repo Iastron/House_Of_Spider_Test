@@ -1,0 +1,816 @@
+<title>거미집 인물 테스트</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Song+Myung&family=Gowun+Dodum&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: 하나의 좁은 '복도' 컬럼. 위쪽 거미줄 캔버스가 진행도를 실로 표시하고, 결과는 문 너머의 방처럼 열린다. */
+:root {
+  --bg: #12131a;          /* 이공간의 밤 */
+  --bg-2: #1a1c26;        /* 복도 벽 */
+  --line: #2c2f3d;        /* 문틀 */
+  --silk: #ebe6dc;        /* 거미줄 비단 */
+  --thread: #9195a8;      /* 은사 */
+  --gold: #c9a45c;        /* 실이 엮이는 빛 */
+  --c-thumb: #d0955a;     /* 엄지 */
+  --c-index: #dcd8cf;     /* 검지 */
+  --c-middle: #a283e0;    /* 중지 */
+  --c-ring: #e095ab;      /* 약지 */
+  --c-pinky: #72a0e0;     /* 소지 */
+  --c-sword: #e2675e;     /* 거미집의 검: 연기 낀 선홍 */
+  --c-araya: #7cc7b4;     /* 아라야 */
+  --f-display: "Song Myung", "Nanum Myeongjo", "Batang", serif;
+  --f-body: "Gowun Dodum", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "Consolas", monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--silk);
+  font-family: var(--f-body);
+  font-size: 16px;
+  line-height: 1.7;
+  padding-inline: 16px;
+  padding-block: 0 48px;
+}
+.wrap { max-width: 640px; margin: 0 auto; }
+
+header.top {
+  display: flex; justify-content: space-between; align-items: baseline;
+  gap: 12px; padding-block: 20px 8px;
+  font-family: var(--f-mono); font-size: 12px; letter-spacing: .08em;
+  color: var(--thread); text-transform: uppercase;
+}
+header.top b { color: var(--gold); font-weight: 500; }
+
+.web-box { display: flex; justify-content: center; padding-block: 8px; }
+canvas#web { width: 100%; max-width: 260px; aspect-ratio: 1; display: block; }
+
+h1 {
+  font-family: var(--f-display); font-weight: 400;
+  font-size: clamp(36px, 9vw, 56px); line-height: 1.15;
+  text-align: center; margin: 4px 0 8px; text-wrap: balance;
+}
+.lede { text-align: center; color: var(--thread); margin: 0 auto 24px; max-width: 34em; text-wrap: balance; }
+
+.facts {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 8px;
+  margin-bottom: 28px; padding: 0; list-style: none;
+}
+.facts li {
+  font-family: var(--f-mono); font-size: 12px; letter-spacing: .04em;
+  border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; color: var(--thread);
+}
+.facts li.warn { border-color: color-mix(in srgb, var(--gold) 50%, transparent); color: var(--gold); }
+
+.btn {
+  font: inherit; cursor: pointer; border-radius: 4px;
+  padding: 12px 22px; border: 1px solid var(--silk);
+  background: var(--silk); color: var(--bg); font-weight: 700;
+  transition: transform .15s ease, background .15s ease;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn.ghost { background: transparent; color: var(--silk); border-color: var(--line); font-weight: 400; }
+.btn.ghost:hover { border-color: var(--thread); }
+.btn:focus-visible, .opt:focus-visible, .chip:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+.center { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+
+.cast { margin-top: 40px; display: grid; gap: 18px; }
+.cast-h, .section-h {
+  font-family: var(--f-mono); font-weight: 500; font-size: 12px;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--thread);
+  margin: 0 0 10px; display: flex; align-items: center; gap: 10px;
+}
+.cast-h::after, .section-h::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.cast-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+.cast-grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.chip {
+  font: inherit; cursor: pointer; text-align: left;
+  background: var(--bg-2); border: 1px solid var(--line); border-radius: 4px;
+  padding: 8px 10px; color: var(--silk); min-width: 0;
+  border-top: 3px solid var(--fc);
+}
+.chip:hover { border-color: var(--fc); }
+.chip small { display: block; font-family: var(--f-mono); font-size: 10px; letter-spacing: .04em; color: var(--thread); }
+.chip span { font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+@media (max-width: 520px) { .cast-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+.qmeta {
+  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  font-family: var(--f-mono); font-size: 12px; color: var(--thread); letter-spacing: .06em;
+}
+.qmeta .count b { color: var(--gold); font-weight: 500; }
+.bar { height: 2px; background: var(--line); margin: 10px 0 28px; position: relative; overflow: hidden; }
+.bar i { position: absolute; inset: 0 auto 0 0; background: var(--gold); transition: width .3s ease; }
+.qtext {
+  font-family: var(--f-display); font-weight: 400;
+  font-size: clamp(23px, 5.4vw, 30px); line-height: 1.4;
+  margin: 0 0 24px; text-wrap: balance;
+}
+.opts { display: grid; gap: 10px; }
+.opt {
+  font: inherit; text-align: left; cursor: pointer; color: var(--silk);
+  background: var(--bg-2); border: 1px solid var(--line); border-radius: 4px;
+  padding: 14px 16px 14px 48px; position: relative; line-height: 1.55;
+  transition: border-color .15s ease, background .15s ease;
+}
+.opt::before {
+  content: attr(data-k); position: absolute; left: 16px; top: 14px;
+  font-family: var(--f-mono); font-size: 12px; color: var(--thread);
+  width: 20px; height: 20px; border: 1px solid var(--line); border-radius: 50%;
+  display: grid; place-items: center; line-height: 1;
+}
+.opt:hover { border-color: var(--thread); background: color-mix(in srgb, var(--bg-2) 80%, var(--silk) 6%); }
+.opt.picked { border-color: var(--gold); }
+.opt.picked::before { border-color: var(--gold); color: var(--gold); }
+.qnav { display: flex; justify-content: space-between; margin-top: 20px; gap: 10px; }
+.result-door {
+  border: 1px solid var(--line); border-top: 4px solid var(--rc);
+  background: var(--bg-2); border-radius: 4px; padding: 24px 20px; margin-top: 8px;
+}
+.eyebrow { font-family: var(--f-mono); font-size: 12px; letter-spacing: .1em; color: var(--thread); text-transform: uppercase; margin: 0; }
+.rname {
+  font-family: var(--f-display); font-weight: 400; font-size: clamp(44px, 12vw, 72px);
+  line-height: 1.05; margin: 6px 0 2px; color: var(--rc);
+}
+.rrole { font-family: var(--f-mono); font-size: 13px; color: var(--silk); letter-spacing: .04em; }
+.rtag { font-family: var(--f-display); font-size: 21px; margin: 16px 0 0; line-height: 1.5; text-wrap: balance; }
+.rsummary { color: color-mix(in srgb, var(--silk) 82%, var(--bg)); margin: 12px 0 0; }
+
+.mind { margin-top: 24px; padding: 14px 16px; border-left: 2px solid var(--rc); background: color-mix(in srgb, var(--bg-2) 85%, var(--rc) 6%); }
+.mind p { margin: 0; }
+.mind .eyebrow { margin-bottom: 4px; }
+
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 28px; }
+@media (max-width: 560px) { .cols { grid-template-columns: 1fr; } }
+.cols > div { min-width: 0; }
+.list { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+.list li { padding-left: 16px; position: relative; }
+.list li::before { content: ""; position: absolute; left: 0; top: .72em; width: 7px; height: 1px; background: var(--rc); }
+
+.facts-table { width: 100%; border-collapse: collapse; margin-top: 28px; font-size: 15px; }
+.facts-table th, .facts-table td { text-align: left; vertical-align: top; padding: 10px 0; border-top: 1px solid var(--line); }
+.facts-table th {
+  width: 7.5em; font-family: var(--f-mono); font-weight: 400; font-size: 12px;
+  letter-spacing: .06em; color: var(--thread); padding-right: 12px; padding-top: 13px;
+}
+.facts-table td b { color: var(--rc); font-weight: 400; }
+
+details.spoiler { margin-top: 20px; border: 1px dashed var(--line); border-radius: 4px; padding: 10px 14px; }
+details.spoiler summary { cursor: pointer; font-family: var(--f-mono); font-size: 12px; letter-spacing: .06em; color: var(--gold); }
+details.spoiler p { margin: 10px 0 2px; }
+
+.match { margin-top: 32px; }
+.mrow {
+  display: grid; grid-template-columns: 7em 1fr 3.2em; gap: 12px; align-items: center;
+  padding-block: 6px; font-size: 15px;
+}
+.mrow .nm { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mrow .nm small { font-family: var(--f-mono); color: var(--thread); font-size: 10px; display: block; line-height: 1.2; }
+.mtrack { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; }
+.mtrack i { display: block; height: 100%; border-radius: 3px; }
+.mrow .pc { font-family: var(--f-mono); font-size: 13px; text-align: right; font-variant-numeric: tabular-nums; color: var(--thread); }
+.mrow.top .pc { color: var(--silk); }
+
+.pair {
+  margin-top: 28px; display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: center;
+  padding: 14px 16px; border: 1px solid var(--line); border-radius: 4px;
+}
+.pair .knot {
+  width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--pc);
+  display: grid; place-items: center; font-family: var(--f-display); font-size: 18px; color: var(--pc);
+}
+.pair p { margin: 0; font-size: 15px; }
+.pair p b { color: var(--pc); font-weight: 400; }
+
+.actions { margin-top: 28px; }
+.toast { text-align: center; font-family: var(--f-mono); font-size: 12px; color: var(--gold); min-height: 1.5em; margin-top: 10px; }
+textarea#copyFallback { width: 100%; margin-top: 10px; background: var(--bg-2); color: var(--silk); border: 1px solid var(--line); border-radius: 4px; padding: 8px; font: inherit; font-size: 14px; }
+
+footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 13px; color: var(--thread); }
+footer p { margin: 0 0 6px; }
+
+.fade-in { animation: fade .35s ease both; }
+@keyframes fade { from { opacity: .4; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .fade-in { animation: none; }
+  .btn, .bar i, .opt { transition: none; }
+}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <span>The House of Spiders</span>
+    <span id="topState"><b>대기</b> · 복도 입구</span>
+  </header>
+
+  <div class="web-box"><canvas id="web" width="520" height="520" aria-hidden="true"></canvas></div>
+
+  <section id="intro">
+    <h1>거미집 인물 테스트</h1>
+    <p class="lede">일상 속 장면 스물두 개가 차례로 나옵니다. 장면마다 보기 다섯 개 중 내가 할 법한 반응 하나를 고르세요. 정답은 없으니 되고 싶은 모습보다 지금의 나에 가까운 답을 고르면 됩니다. 답할 때마다 거미줄이 한 겹씩 엮입니다.</p>
+    <ul class="facts">
+      <li>22문항</li>
+      <li>약 5분</li>
+      <li>결과 인물 12명</li>
+      <li class="warn">림버스 컴퍼니 9장 스포일러 포함</li>
+    </ul>
+    <div class="center"><button class="btn" id="startBtn" type="button">복도로 들어가기</button></div>
+
+    <div class="cast" id="cast"></div>
+  </section>
+
+  <section id="quiz" hidden>
+    <div class="qmeta">
+      <span class="count">실 <b id="qNum">01</b> / <span id="qTotal">22</span></span>
+      <span id="qTheme"></span>
+    </div>
+    <div class="bar"><i id="barFill" style="width:0%"></i></div>
+    <div id="qBody"></div>
+    <div class="qnav">
+      <button class="btn ghost" id="backBtn" type="button">이전 질문</button>
+      <button class="btn ghost" id="quitBtn" type="button">처음으로</button>
+    </div>
+  </section>
+
+  <section id="result" hidden></section>
+
+  <footer>
+    <p>나무위키 「거미집(Project Moon 세계관)」 문서와 각 인물 문서(2026-10-12 조회)를 바탕으로 만든 팬 테스트입니다. 성격 묘사는 원문을 요약한 것이고 일부에는 해석이 섞여 있습니다.</p>
+    <p>Limbus Company © Project Moon. 이 페이지는 비공식 팬 콘텐츠입니다.</p>
+  </footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var CHARS = {
+    val: {
+      name: "발렌치나", role: "거미집 엄지 아비", chip: "엄지 아비", color: "var(--c-thumb)",
+      pair: "lucio", pairLabel: "당신의 제자",
+      tag: "지나간 영광을 놓지 못한 전쟁 영웅",
+      mind: "인정받지 못한 상처를 분노로 바꿔 바깥으로 쏟아 내는 사람입니다. 애정이 없는 건 아니지만, 마음이 좋을 때만 그 애정을 꺼내 줍니다.",
+      summary: "몰락한 명문가의 영애이자 전 엄지 언더보스입니다. 거칠고 변덕스럽지만, 자기 사람이 다치면 누구보다 먼저 분노합니다.",
+      traits: ["걸핏하면 욕설과 손찌검이 나오는 불같은 성미", "과거의 공적을 되짚으며 보상받고 싶어 하는 마음", "위아래는 엄격히 따지지만 정작 본인은 무례함", "투박하지만 진짜인 정, 그리고 전쟁이 남긴 상처"],
+      tastes: ["술, 특히 '올드파'와 시가", "손님을 앉혀 두고 늘어놓는 연기 전쟁 무용담", "사람을 물건 이름으로 부르는 버릇(티켓, 교본, 짐덩이)", "검술의 정석. 자세 하나도 그냥 넘기지 않음"],
+      place: "엄지의 복도. 주류 진열대와 시가가 놓인 응접실",
+      weapon: "보냐텔리 가문의 검술 '팔레르모', 의안 유물 '예지안'",
+      virtue: "<b>예(禮)</b> · 이 아비가 끝내 지키지 못한 덕목입니다.",
+      spoiler: "루치오가 죽자 베르길리우스를 내버려 두고 그레고르에게 달려들었다가, 불완전하게 부화한 바퀴 황제에게 최후를 맞습니다."
+    },
+    rien: {
+      name: "뤼엔", role: "거미집 검지 아비", chip: "검지 아비", color: "var(--c-index)",
+      pair: "sora", pairLabel: "당신의 제자",
+      tag: "결말을 아껴 두는 다정한 대행자",
+      mind: "감정을 깊이 눌러 두고, 가장 중요한 판단은 자기보다 큰 무언가에 맡겨 온 사람입니다. 잃는 것이 두려워 끝을 보지 않으려 하고, 놓아야 할 때 붙잡습니다.",
+      summary: "검지 신탁 대행자이자 거미집의 실질적인 수장입니다. 늘 침착하고 말씨가 부드럽지만 속내는 누구도 모릅니다. 지령을 원망하면서도 끝내 거스르지 못한 사람입니다.",
+      traits: ["감정의 기복이 거의 없는 차분함", "상처에 반창고를 붙여 주는 다정함", "지령이라는 명분 뒤에 숨긴 가학적인 취향", "끝까지 본명도, 계획도 털어놓지 않는 비밀주의"],
+      tastes: ["삽화가 있는 그림책. 결말은 늘 아껴 둠", "가장 손에 익은 무기인 대낫", "'숟가락포크'가 아니라 끝까지 '포크숟가락'", "파도와 바다 이야기"],
+      place: "검지의 복도. 흑백 가정집에 동화책이 가득함",
+      weapon: "형태가 바뀌는 신탁 단말기 '카두세우스', 제논의 거북나선",
+      virtue: "<b>신(信)</b> · 이 아비가 끝내 지키지 못한 덕목입니다.",
+      spoiler: "마지막 전투에서 처음으로 지령을 어기고 료슈를 붙잡지만, 끝내 료슈를 놓아줍니다. 도주한 뒤 자신을 쫓아온 대행자들을 쓰러뜨리고 스스로 생을 마감합니다."
+    },
+    matt: {
+      name: "마티아스", role: "거미집 중지 아비", chip: "중지 아비", color: "var(--c-middle)",
+      pair: "kira", pairLabel: "당신의 제자",
+      tag: "포장도 뜯지 않은 장난감을 모으는 큰 형님",
+      mind: "어린 시절 채워지지 않은 결핍을 '갖는 것'으로 메우는 사람입니다. 아낌없이 주지만, 주는 기준은 늘 상대가 아니라 자기 자신입니다.",
+      summary: "전 중지 큰 형님입니다. 호탕하고 유쾌하며, 적이라도 멋진 건 멋지다고 말합니다. 하지만 마음에 들지 않으면 금방 질려서 부숴 버리고, '가족'이라는 말로 자기 욕심을 정당화합니다.",
+      traits: ["단순하고 유쾌한 기분파", "쉽게 싫증 내고 부숴 버리는 변덕", "가족에게 무엇이든 사 주는 통 큰 씀씀이", "짐승 같은 직감으로 상대를 꿰뚫는 눈"],
+      tastes: ["피규어, 만화, 희귀 프라모델 수집", "어릴 적부터 꿈꾼 '전설의 검' 레바테인", "멋있어 보이는 것에 대한 집착", "바가지 머리, 그리고 단골 미용실 헤어쿠폰"],
+      place: "중지의 복도. 수집품 진열장 사이에 소파와 TV 하나",
+      weapon: "대검 유물 '레바테인', 원한 문신, 곰 발바닥",
+      virtue: "<b>의(義)</b> · 이 아비가 끝내 지키지 못한 덕목입니다.",
+      spoiler: "거미집 태우기 작전에서 키라를 미끼로 삼아 베스파와 함께 베어 버린 뒤, 모제스와 베스파의 협공에 쓰러집니다."
+    },
+    call: {
+      name: "칼리스토", role: "거미집 약지 아비", chip: "약지 아비", color: "var(--c-ring)",
+      pair: "albina", pairLabel: "당신의 제자",
+      tag: "모든 사조를 꿈꾼 은퇴한 마에스트로",
+      mind: "평생 자신을 진짜로 이해해 줄 사람을 기다린 사람입니다. 사랑은 진심이지만, 자기가 아는 방식으로만 사랑할 줄 압니다.",
+      summary: "약지 신체파의 전 마에스트로입니다. 누구에게나 존댓말을 쓰고 대화와 배움을 즐깁니다. 그러나 사람을 '재료'로 대하는 약지의 미학에서 끝내 벗어나지 못했습니다.",
+      traits: ["예의 바르고 교양 있는 말씨", "틀렸으면 바로 인정하는 배우는 자세", "사람을 '재료'라고 부르는 예술가의 광기", "자신을 이해해 주는 사람을 깊이 존중함"],
+      tastes: ["여러 사조를 엮은 '모두를 위한 역작'", "온도와 위생까지 관리하는 개인 갤러리", "각오나 희생처럼 눈에 보이지 않는 아름다움", "술 취해 갤러리를 어지럽히는 사람을 질색함"],
+      place: "약지의 복도. 뒷문 조형물을 둘러싼 개인 갤러리",
+      weapon: "자기 몸으로 10년 넘게 빚은 대검 '티비아'",
+      virtue: "<b>지(知)</b> · 이 아비가 끝내 지키지 못한 덕목입니다.",
+      spoiler: "어느 싱클레어에게 패한 뒤 자신이 보지 못한 광경을 보여 달라고 청합니다. 무언가를 전해 받고 미련 없이 숨을 거둡니다."
+    },
+    yoru: {
+      name: "시오미 요루", role: "거미집 소지 아비", chip: "소지 아비", color: "var(--c-pinky)",
+      pair: "ryoshu", pairLabel: "당신의 딸",
+      tag: "닫힌 복도에서 자유를 그리던 지혜성",
+      mind: "자유를 빼앗긴 분노와 자기혐오가 가장 가까운 사람에게 향한 사람입니다. 사랑을 주지 못했지만, 마지막에는 상대가 자신과 다른 길을 가도록 등을 떠밀었습니다.",
+      summary: "소지의 별호 '지혜성'을 받은 검객입니다. 혈통 때문에 거미집에 붙잡혀 와 갇혀 지냈습니다. 원하지 않았던 딸 료슈를 미워했고, 그 미움은 자기 자신을 향한 것이기도 했습니다.",
+      traits: ["가시 돋친 말과 냉담한 태도", "늙어 가는 자신에 대한 혐오", "희망을 내려놓은 깊은 체념", "그래도 닮지 말라고 남긴 단 한마디"],
+      tastes: ["분재와 도검이 놓인 일본식 방", "말없이 함께 피우는 담배", "무엇보다 떠돌던 시절의 자유", "얼굴을 가리는 흰 장갑과 베일"],
+      place: "소지의 복도. 푸른 조명 아래 끝없이 교차하는 일본식 가정집",
+      weapon: "오오타치 '지혜성도', 발도술, 공간참",
+      virtue: "<b>인(仁)</b> · 이 아비가 끝내 지키지 못한 덕목입니다.",
+      spoiler: "료슈가 거미집을 탈주할 때 료슈의 손에 숨을 거둡니다. 9장에 등장하는 '소지 아비'는 진짜 시오미 요루가 아닙니다."
+    },
+    lucio: {
+      name: "루치오", role: "거미집 엄지 제자", chip: "엄지 제자", color: "var(--c-thumb)",
+      pair: "val", pairLabel: "당신의 아비",
+      tag: "교본으로 길러진 조용한 검",
+      mind: "은혜와 공포에 묶여 오래 참아 온 사람입니다. 떠날 이유는 충분한데, 끊어 내는 순간을 계속 다음으로 미룹니다.",
+      summary: "뒷골목 고아였다가 발렌치나에게 거두어진 엄지 제자입니다. 하십시오체를 쓰며 감정 없이 말합니다. 그 속에는 은혜와 공포, 그리고 오래 눌러 둔 살의가 함께 있습니다.",
+      traits: ["감정을 드러내지 않는 무미건조함", "정해진 대로 몇 번이고 되풀이하는 성실함", "참고 또 참는 인내", "떠나지도 끊어 내지도 못하는 관계"],
+      tastes: ["교본에 없는 기술은 정중히 사양함", "일대일 결투에 대한 자부심", "술 취한 스승을 위해 준비하는 해장 음식", "혼자 있을 때 다듬는 검술"],
+      place: "엄지의 복도에서 스승의 그늘 아래",
+      weapon: "팔레르모식 레이피어와 외날검 '절참도'",
+      virtue: "<b>예(禮)</b> · 아비에게서 물려받은 손가락의 덕목입니다.",
+      spoiler: "이번 전투가 끝나면 스승을 끊어 내겠다고 다짐하지만, 이형 발작을 일으킨 그레고르에게 심장이 꿰뚫려 숨을 거둡니다."
+    },
+    sora: {
+      name: "소라", role: "거미집 검지 제자", chip: "검지 제자", color: "var(--c-index)",
+      pair: "rien", pairLabel: "당신의 아비",
+      tag: "더듬거리면서도 할 말은 하는 대행자",
+      mind: "한 사람의 인정이 곧 자기 가치가 되어 버린 사람입니다. 그만큼 믿음이 단단해서, 흔들릴 듯 보여도 끝까지 꺾이지 않습니다.",
+      summary: "동그란 안경을 쓴 검지 대행자이자 제자입니다. 소심하고 말을 더듬지만 하고 싶은 말은 끝까지 다 합니다. 스승에게 인정받는 것, 그의 딸이 되는 것이 소원입니다.",
+      traits: ["친절하지만 자존감이 낮음", "한 사람에게 깊이 기대는 마음", "말은 더듬어도 꺾이지 않는 강단", "스스로 바란 것과 지령이 맞아떨어질 만큼 단단한 믿음"],
+      tastes: ["지령을 받는 '마법의 삐삐'", "친절하게 대해 주는 사람", "말이 안 되는 부분은 꼭 짚고 넘어감", "틈만 나면 스승 자랑"],
+      place: "검지의 복도, 스승의 그림책 옆자리",
+      weapon: "개화 E.G.O '대행'",
+      virtue: "<b>신(信)</b> · 아비에게서 물려받은 손가락의 덕목입니다.",
+      spoiler: "시련을 넘기면 뤼엔의 딸이 될 수 있다는 지령을 받고 무아 상태의 료슈에게 맞섭니다. 아라야시키에 베여 존재가 희미해집니다."
+    },
+    kira: {
+      name: "키라", role: "거미집 중지 제자", chip: "중지 제자", color: "var(--c-middle)",
+      pair: "matt", pairLabel: "당신의 아비",
+      tag: "밝은 얼굴 뒤에 불안을 숨긴 사람",
+      mind: "관계가 끊길까 봐 늘 상대에게 맞춰 온 사람입니다. 붙임성 좋은 겉모습 아래에는 버려질지 모른다는 두려움이 있습니다.",
+      summary: "후드 테크웨어를 입은 중지 제자입니다. 붙임성 좋고 수다스럽지만, 속으로는 아비와의 관계가 언제 끊길지 몰라 불안해합니다. 좋아하는 것을 들고 먼저 다가가는 사람입니다.",
+      traits: ["외향적이고 붙임성 좋음", "'욜라', '간지' 같은 유행어", "밝은 얼굴 뒤에 숨긴 애정결핍", "상황을 빠르게 읽는 감각"],
+      tastes: ["히어로물과 해결사물의 화려한 장면", "컵라면과 토스터 페이스트리", "만화 추천(취향은 다소 마이너)", "아비의 취향에 맞춰 준 수집품들"],
+      place: "중지의 복도, TV 앞 소파 한쪽",
+      weapon: "열선이 달린 대도와 쌍검, 은신 장비",
+      virtue: "<b>의(義)</b> · 아비에게서 물려받은 손가락의 덕목입니다.",
+      spoiler: "마티아스에게 함께 베였다가 생포되어 거미집 제자 가운데 유일하게 살아남습니다. 이후 료슈 일행의 거미집 탐사에 길잡이로 동행하며 료슈와 가까워집니다."
+    },
+    albina: {
+      name: "알비나", role: "거미집 약지 제자", chip: "약지 제자", color: "var(--c-ring)",
+      pair: "call", pairLabel: "당신의 아비",
+      tag: "자신을 깎아 친구를 만든 조각가",
+      mind: "생각한 것을 그대로 말하고 원하는 것을 그대로 하는 사람입니다. 한번 마음을 준 대상에는 깊이 애착하지만, 다른 사람과 가까워지는 방법은 조금 어긋나 있습니다.",
+      summary: "뇌를 뺀 전신을 의체로 바꾼 약지 제자입니다. 자기 몸으로 빚은 대검 '파시아'를 친구로 여깁니다. 거짓말을 못 할 만큼 솔직하고, 하고 싶은 일은 계획보다 먼저 합니다.",
+      traits: ["무표정 뒤의 강한 욕망과 고집", "지나칠 만큼 솔직함", "'친구'에 대한 독특한 생각", "스승을 존경하지만 자기만의 주제를 품음"],
+      tastes: ["파시아 챙기기(식사도, 부끄러움도)", "입을 때와 벗을 때가 다른 갑주의 미학", "몸의 주인은 누구인가 같은 철학적 질문", "심장을 망가뜨리는 거북나선은 질색"],
+      place: "약지의 복도, 스승의 갤러리 한쪽 작업대",
+      weapon: "생체 대검 '파시아', 아이언 메이든 갑주",
+      virtue: "<b>지(知)</b> · 아비에게서 물려받은 손가락의 덕목입니다.",
+      spoiler: "어느 싱클레어에게 파시아가 부서지자 왜 파시아를 부수느냐고 따지다가 그대로 숨을 거둡니다."
+    },
+    ren: {
+      name: "렌", role: "거미집 소지 제자", chip: "소지 제자", color: "var(--c-pinky)",
+      pair: "yoru", pairLabel: "당신의 아비(로 알려진 사람)",
+      tag: "검의 길을 묵묵히 걷는 단정한 사람",
+      mind: "냉대를 받아도 그것을 대물림하지 않은 사람입니다. 상대의 약한 면을 헤아리고, 엇갈린 사람들 사이를 조용히 이어 줍니다.",
+      summary: "가지런한 단발에 하소서체를 쓰는 소지 제자입니다. 다섯 제자 가운데 가장 반듯하게 자랐습니다. 몸은 약하지만 수련으로 그 약점을 메웠고, 냉대받으면서도 스승 곁을 지켰습니다.",
+      traits: ["적에게도 예의를 지키는 단정함", "공과 사의 구분", "냉대에도 변하지 않는 연민과 충심", "계획을 흐트러뜨리는 일에는 단호함"],
+      tastes: ["오직 검의 길. 이름을 얻지 못해도 괜찮음", "군더더기 없는 발도술과 공간참", "만화 권유는 정중하게 피해 다님", "엇갈린 사람들 사이를 이어 주기"],
+      place: "소지의 복도, 스승의 방문 앞",
+      weapon: "오오타치 '월하청도'",
+      virtue: "<b>인(仁)</b> · 다섯 제자 가운데 유일하게 손가락의 덕목을 제대로 실천했습니다.",
+      spoiler: "그가 실제로 섬긴 스승은 지혜성으로 위장한 아라야였습니다. 스승을 구하려고 무아 상태의 료슈에게 맞섰다가 아라야시키에 베여 존재가 희미해집니다."
+    },
+    ryoshu: {
+      name: "료슈", role: "거미집의 검 · LCB 4번 수감자", chip: "거미집의 검", color: "var(--c-sword)",
+      pair: "araya", pairLabel: "당신의 딸",
+      tag: "모든 것을 줄여 말하지만, 소중한 것만은 줄이지 않는 사람",
+      mind: "다섯 사람의 뒤틀린 사랑 속에서 자라 스스로 그곳을 빠져나온 사람입니다. 거칠고 말이 짧지만, 지키고 싶은 것은 아무도 모르는 곳에 숨겨서라도 지킵니다.",
+      summary: "본명은 요시히데입니다. 다섯 아비의 손에 '무엇이든 베는 검'으로 길러졌다가, 거미집을 빠져나와 림버스 컴퍼니 수감자가 되었습니다. 평소엔 과묵하지만 싸움에서는 날뛰고, 딸 아라야만큼은 무엇보다 소중히 여겼습니다.",
+      traits: ["과묵하지만 은근한 장난기", "거칠어도 아이에게는 한없이 다정함", "아비들을 향한 원망, 그리고 뤼엔에게 남은 미묘한 애증", "순조로운 일보다 예측 못 할 상황을 즐김"],
+      tastes: ["담배. 사람을 벤 뒤에는 꼭 한 대", "'만물의 단축은 지고의 예술', 만단지예", "아무도 못 알아듣는 줄임말", "요리는 서툶. 문어 소시지가 진짜 문어처럼 나옴"],
+      place: "료슈와 아라야의 방, 소지의 복도 안쪽",
+      weapon: "대태도 '아라야시키(천살성도)'. 뽑을 때마다 기억을 대가로 무엇이든 벰",
+      virtue: "다섯 손가락의 가치를 모두 배웠지만, 그녀가 따르는 것은 자신만의 미학입니다.",
+      spoiler: "9장에서 지혜성의 정체를 모른 채 딸 아라야를 베고 무아 상태에 빠집니다. 아라야가 검집이 되어 그녀를 되돌리고, 료슈는 딸에 대한 기억을 잃은 채 검집과 함께 걷게 됩니다."
+    },
+    araya: {
+      name: "아라야", role: "료슈의 딸", chip: "료슈의 딸", color: "var(--c-araya)",
+      pair: "ryoshu", pairLabel: "당신의 엄마",
+      tag: "기다리고, 원망하고, 끝내 먼저 안아 준 아이",
+      mind: "버려졌다고 믿으면서도 끝까지 이유를 찾으려 했던 사람입니다. 원망과 그리움이 함께 있었고, 진실을 알게 되자 받은 사랑을 그대로 돌려주는 쪽을 택했습니다.",
+      summary: "료슈가 임무 중 거두어 키운 딸입니다(료슈의 유전적 클론). 무뚝뚝한 엄마와 반대로 해맑고 살가웠습니다. 홀로 남겨진 긴 시간 동안 엄마를 원망했지만, 엄마가 한 순간도 자신을 놓지 않았다는 걸 알고 용서합니다.",
+      traits: ["해맑고 살가움", "오래 기다리는 끈기", "원망과 그리움이 함께하는 애증", "사랑받은 만큼 돌려주고 싶은 마음"],
+      tastes: ["기타 연주(실력과는 별개로)", "'료슈'라는 애칭을 만든 장본인. 줄임말도 원래는 아라야가 가르쳐 줌", "문어 소시지는 귀여워야 함", "커서 되고 싶은 것은 '엄마의 엄마'"],
+      place: "료슈와 아라야의 방, 그리고 시간 금고",
+      weapon: "지혜성도, 개화 E.G.O(아라야시키의 검집)",
+      virtue: "<b>인(仁)</b> · 자기를 버리고 엄마를 구한 마음입니다.",
+      spoiler: "9장의 '소지 아비 지혜성'의 정체가 아라야입니다. 료슈의 검에 찔린 뒤 엄마의 기억을 엿보고 용서하며, 자신을 검집으로 바꿔 아라야시키를 봉인합니다. 9.5장부터는 검집이 되어 료슈 곁에 있습니다."
+    }
+  };
+
+  var GROUPS = [
+    { label: "아비", ids: ["val", "rien", "matt", "call", "yoru"] },
+    { label: "제자", ids: ["lucio", "sora", "kira", "albina", "ren"] },
+    { label: "거미집의 검과 그 딸", ids: ["ryoshu", "araya"] }
+  ];
+  var ORDER = ["val", "rien", "matt", "call", "yoru", "lucio", "sora", "kira", "albina", "ren", "ryoshu", "araya"];
+
+  // 모든 문항: 일상 장면 하나 + 그 순간 할 법한 말/행동 보기 다섯 개(A~E). 보기마다 인물별 점수.
+  var QUESTIONS = [
+    { type: "pick", theme: "약속", q: "친구와의 약속 장소. 친구가 한 시간째 연락도 없이 오지 않는다.", o: [
+      ["(전화를 걸어) \"지금 어디야? 이번이 몇 번째인지는 알아?\"", { val: 3, yoru: 1 }],
+      ["\"무슨 일 있는 건 아니겠지…\" 조금만 더 기다려 본다.", { araya: 3, ren: 1 }],
+      ["\"그래, 기대한 내가 잘못이지.\" 말없이 집으로 돌아간다.", { yoru: 2, ryoshu: 2 }],
+      ["\"내가 시간을 잘못 알았나?\" 주고받은 메시지를 다시 확인한다.", { sora: 2, kira: 2 }],
+      ["\"나온 김에 혼자 놀다 가지 뭐.\" 근처를 구경하러 간다.", { matt: 2, albina: 2 }]
+    ]},
+    { type: "pick", theme: "감정", q: "기분이 몹시 상한 날, 사람들 앞에서 나는…", o: [
+      ["숨기지 않는다. 표정과 말투에 그대로 드러난다.", { val: 3, matt: 1 }],
+      ["얼굴은 평소와 같다. 아무도 눈치채지 못한다.", { rien: 3, lucio: 1 }],
+      ["날 선 말이 한두 마디 새어 나온다.", { yoru: 2, ryoshu: 1 }],
+      ["내가 분위기를 망칠까 봐 오히려 더 밝게 군다.", { kira: 3 }],
+      ["이유를 혼자 곱씹으며 조용히 삭인다.", { ren: 2, lucio: 1 }]
+    ]},
+    { type: "pick", theme: "평가", q: "회의 자리에서 윗사람이 내 의견을 \"별로네\" 한마디로 잘라 버린다.", o: [
+      ["\"어느 부분이 아쉬운지 구체적으로 말씀해 주시면 다듬어 보겠습니다.\"", { call: 3, ren: 1 }],
+      ["(속으로) '다음엔 반드시 인정받게 만들겠어.'", { sora: 2, lucio: 2, val: 1 }],
+      ["\"네, 알겠습니다.\" 그러고는 내 방식대로 조용히 밀고 나간다.", { ryoshu: 2, albina: 2 }],
+      ["\"제가 이 일을 몇 년째 하고 있는데요.\"", { val: 2, matt: 2 }],
+      ["\"말씀하신 대로 하겠습니다. 판단은 맡길게요.\"", { rien: 3, sora: 1 }]
+    ]},
+    { type: "pick", theme: "판단", q: "인생이 걸린 중요한 결정을 앞두고 있다.", o: [
+      ["내가 믿는 사람의 말을 따른다. 그쪽이 마음 편하다.", { sora: 3, lucio: 1 }],
+      ["이미 정해진 길이 있다면 그대로 간다. 고민해도 결국 같다.", { rien: 3, lucio: 1 }],
+      ["누가 뭐라든 내가 정한다.", { ryoshu: 3, albina: 1 }],
+      ["지금 가장 끌리는 쪽을 고른다.", { matt: 2, albina: 2 }],
+      ["다른 사람에게 피해가 덜 가는 쪽을 고른다.", { ren: 2, araya: 2 }]
+    ]},
+    { type: "pick", theme: "물건", q: "오래 아껴 온 물건을 가족이 상의도 없이 버렸다.", o: [
+      ["\"그게 어떤 건데! 왜 남의 물건에 손을 대?\"", { val: 2, matt: 2, albina: 1 }],
+      ["\"…괜찮아.\" 하고 넘기지만, 그 일이 한동안 마음에 남는다.", { lucio: 2, rien: 2, ryoshu: 1 }],
+      ["(말없이 수거함까지 가서) 직접 다시 찾아온다.", { albina: 3, ryoshu: 1 }],
+      ["\"나 대신 정리해 주려던 거겠지.\"", { araya: 2, ren: 2 }],
+      ["(속으로) '내 것은 늘 이렇게 사라지더라.'", { yoru: 3, kira: 1 }]
+    ]},
+    { type: "pick", theme: "인정", q: "공들인 일을 끝냈는데 아무도 알아주지 않는다.", o: [
+      ["서운하다. 알아줄 때까지 더 잘하려 한다.", { sora: 3, kira: 1 }],
+      ["화가 난다. 내 공은 제대로 짚어 줘야 한다.", { val: 3 }],
+      ["상관없다. 내가 만족하면 그만이다.", { ryoshu: 2, albina: 2 }],
+      ["언젠가는 알아보는 사람이 나오겠지.", { call: 3 }],
+      ["그럴 줄 알았다. 원래 그런 거지.", { yoru: 2, lucio: 2 }]
+    ]},
+    { type: "pick", theme: "이별", q: "가장 가까운 사람이 먼 곳으로 떠나게 되었다고 말한다.", o: [
+      ["\"언제 돌아와? 꼭 연락해. 기다릴게.\"", { araya: 3, kira: 1 }],
+      ["\"가지 마. 여기서도 충분히 지낼 수 있잖아.\"", { rien: 3, matt: 1 }],
+      ["\"잘됐네. 너한테 맞는 곳이면 가야지.\"", { ren: 2, ryoshu: 2 }],
+      ["\"부럽다. 나도 여길 떠날 수 있으면 좋겠다.\"", { yoru: 3, lucio: 1 }],
+      ["\"가기 전에 뭐 하나 만들어 줄게. 잊지 않게.\"", { call: 2, albina: 1, matt: 1 }]
+    ]},
+    { type: "pick", theme: "이해", q: "나에게 상처를 준 사람이 사과도 없이 웃으며 다시 다가온다.", o: [
+      ["그럴 만한 사정이 있었는지 먼저 물어본다.", { araya: 3, ren: 1 }],
+      ["아무 일 없던 것처럼 대하지만, 다시는 마음을 주지 않는다.", { rien: 2, lucio: 2 }],
+      ["\"할 말 없어?\" 짚고 넘어간다.", { val: 2, sora: 1 }],
+      ["상처는 상처다. 마주치지 않게 피한다.", { yoru: 3, ryoshu: 1 }],
+      ["반갑다. 지난 일은 마음에 오래 두지 않는다.", { matt: 2, kira: 1, ren: 1 }]
+    ]},
+    { type: "pick", theme: "모임", q: "모임에서 다들 나만 모르는 이야기로 신이 나 있다.", o: [
+      ["\"그게 뭔데? 나도 알려 줘!\" 먼저 끼어든다.", { kira: 3, araya: 1 }],
+      ["조용히 듣다가, 이해되지 않는 부분을 콕 집어 묻는다.", { sora: 2, call: 1, albina: 1 }],
+      ["굳이 맞추지 않는다. 내 할 일을 한다.", { ryoshu: 2, lucio: 2 }],
+      ["화제를 내가 잘 아는 쪽으로 슬쩍 돌린다.", { val: 2, matt: 2 }],
+      ["말을 아끼고 사람들의 표정과 분위기를 읽는다.", { rien: 2, ren: 1 }]
+    ]},
+    { type: "pick", theme: "솔직함", q: "친구가 새로 산 옷을 입고 \"어때?\" 하고 묻는다. 솔직히 잘 안 어울린다.", o: [
+      ["\"안 어울려.\" 생각한 그대로 말한다.", { albina: 3, ryoshu: 1 }],
+      ["\"어… 그, 색이 좀…\" 더듬거리면서도 결국 말한다.", { sora: 3 }],
+      ["\"괜찮은데?\" 굳이 마음 상하게 하지 않는다.", { kira: 2, rien: 1, lucio: 1 }],
+      ["\"그것보다 이게 낫겠다.\" 내가 고른 걸 사 준다.", { matt: 3, call: 1 }],
+      ["어울리는 점과 아쉬운 점을 차근차근 설명한다.", { call: 2, ren: 1 }]
+    ]},
+    { type: "pick", theme: "부당함", q: "눈앞에서 누군가 약한 사람을 함부로 대하고 있다.", o: [
+      ["\"그만해.\" 망설이지 않고 끼어든다.", { ryoshu: 3, ren: 1 }],
+      ["다친 쪽에게 먼저 다가가 괜찮은지 묻는다.", { araya: 2, ren: 2 }],
+      ["(속으로) '세상이 원래 그렇지.'", { yoru: 2, val: 1 }],
+      ["한 발 물러서서 누가 옳은지부터 따져 본다.", { rien: 2, call: 1, sora: 1 }],
+      ["아무것도 못 했다는 생각에 그 장면이 오래 떠오른다.", { lucio: 2, kira: 2 }]
+    ]},
+    { type: "pick", theme: "주는 마음", q: "아끼는 사람이 많이 지쳐 보인다.", o: [
+      ["필요해 보이는 것들을 잔뜩 사다 안긴다.", { matt: 3 }],
+      ["내가 아는 가장 좋은 방법을 알려 준다.", { call: 2, val: 1 }],
+      ["아무 말 없이 곁에 앉아 있는다.", { ryoshu: 2, yoru: 1, rien: 1 }],
+      ["괜찮다고 할 때까지 계속 들여다본다.", { araya: 2, kira: 1, rien: 1 }],
+      ["스스로 일어설 때까지 묵묵히 기다린다.", { ren: 3, lucio: 1 }]
+    ]},
+    { type: "pick", theme: "선물", q: "오래 고민해서 준비한 선물을 상대가 시큰둥하게 받는다.", o: [
+      ["\"이게 얼마나 좋은 건데. 나중엔 알게 될 거야.\"", { call: 3, matt: 1 }],
+      ["\"마음에 안 들면 다른 걸로 다시 해 줄게.\"", { kira: 2, sora: 1, matt: 1 }],
+      ["(속으로) '역시 내가 하는 건 다 이렇지.'", { yoru: 2, lucio: 2 }],
+      ["\"그래도 받아 줘서 고마워.\"", { araya: 2, ren: 2 }],
+      ["\"됐어, 그럼 내가 쓸게.\" 서운한 티를 숨기지 않는다.", { val: 2, albina: 2 }]
+    ]},
+    { type: "pick", theme: "결말", q: "결과가 나쁠 것 같은 성적표가 도착했다.", o: [
+      ["바로 연다. 빨리 알아야 대비하지.", { ryoshu: 2, call: 1, ren: 1 }],
+      ["며칠 열지 않고 둔다. 모르는 동안은 아직 끝난 게 아니다.", { rien: 3, kira: 1 }],
+      ["열기 전에 마음의 준비를 몇 번이고 한다.", { lucio: 2, sora: 2 }],
+      ["누가 옆에 있을 때 연다. 혼자 보기 싫다.", { kira: 2, araya: 2 }],
+      ["결과보다 내가 무엇을 놓쳤는지가 궁금하다.", { albina: 2, call: 1 }]
+    ]},
+    { type: "pick", theme: "실수", q: "내 실수 때문에 누군가 곤란한 상황에 빠졌다.", o: [
+      ["\"제 잘못입니다. 바로 수습하겠습니다.\"", { ren: 3, araya: 1 }],
+      ["사과는 짧게 하고, 그 사람에게 필요한 걸 말없이 챙긴다.", { ryoshu: 3, rien: 1 }],
+      ["\"그때는 그럴 수밖에 없었어.\"", { yoru: 2, matt: 2 }],
+      ["혼날 생각에 가슴이 철렁 내려앉는다.", { kira: 2, sora: 2, lucio: 1 }],
+      ["무엇이 어디서부터 잘못됐는지 원인부터 파고든다.", { call: 2, albina: 2 }]
+    ]},
+    { type: "pick", theme: "벗어남", q: "오래 머문 곳이 이제는 나를 붙잡아 두는 것처럼 느껴진다.", o: [
+      ["떠날 준비를 조용히 해 둔다.", { ryoshu: 3, lucio: 1 }],
+      ["떠날 수 없다는 걸 안다. 그래서 더 원망스럽다.", { yoru: 3 }],
+      ["그래도 여기 있는 사람들 때문에 남는다.", { ren: 2, kira: 2 }],
+      ["붙잡아 두는 게 아니라 지켜 주는 거라고 생각한다.", { sora: 2, rien: 2 }],
+      ["그 안에서 몰두할 거리를 찾는다.", { call: 2, albina: 2 }]
+    ]},
+    { type: "pick", theme: "빈 시간", q: "아무 일정도 없는 일주일이 갑자기 생겼다.", o: [
+      ["처음 해 보는 일에 무작정 뛰어든다. 예측이 안 될수록 좋다.", { ryoshu: 3, matt: 1 }],
+      ["미뤄 둔 작업 하나를 끝까지 파고든다.", { albina: 2, call: 2 }],
+      ["매일 같은 시간에 같은 연습을 한다.", { lucio: 3, ren: 2 }],
+      ["누구 만날 사람 없나 연락처부터 훑는다.", { kira: 3, araya: 1 }],
+      ["지난 일을 정리하며 조용히 보낸다.", { rien: 2, yoru: 2, val: 1 }]
+    ]},
+    { type: "pick", theme: "고독", q: "사람들 속에 있는데도 혼자인 것 같다. 그 이유는…", o: [
+      ["내 생각을 진짜로 이해하는 사람이 없어서.", { call: 3, albina: 1 }],
+      ["다들 필요할 때만 나를 찾는 것 같아서.", { lucio: 2, kira: 2 }],
+      ["딱히 외롭지 않다. 혼자가 편하다.", { ryoshu: 2, albina: 1 }],
+      ["아직 누군가를 기다리고 있어서.", { araya: 3, rien: 1 }],
+      ["내가 여기 있어야 할 이유를 모르겠어서.", { yoru: 3 }]
+    ]},
+    { type: "pick", theme: "재회", q: "예전에 나를 힘들게 했던 사람에게서 오랜만에 연락이 왔다.", o: [
+      ["받지 않는다. 그 시절로 돌아가고 싶지 않다.", { ryoshu: 2, yoru: 2 }],
+      ["받는다. 미운 마음만큼 그리운 마음도 있다.", { araya: 3, lucio: 1 }],
+      ["\"이제 와서?\" 하고 싶었던 말을 다 한다.", { val: 2, sora: 1, albina: 1 }],
+      ["받긴 하지만 아무렇지 않은 척 담담하게 대한다.", { rien: 2, lucio: 2 }],
+      ["\"그쪽도 힘들었겠지.\" 내가 먼저 안부를 묻는다.", { ren: 3 }]
+    ]},
+    { type: "pick", theme: "맞춤", q: "친한 사람이 좋아하는 것이 나와 전혀 다르다.", o: [
+      ["같이 즐기려고 내가 맞춰 본다. 관계가 더 중요하다.", { kira: 3, sora: 1 }],
+      ["서로의 취향을 존중하고 선을 지킨다.", { ren: 2, rien: 1 }],
+      ["내 취향이 더 낫다는 걸 보여 준다.", { call: 2, matt: 1, val: 1 }],
+      ["신경 쓰지 않는다. 각자 좋아하면 된다.", { ryoshu: 2, lucio: 1, albina: 1 }],
+      ["그걸 왜 좋아하는지 궁금해서 파고든다.", { albina: 2, araya: 1 }]
+    ]},
+    { type: "pick", theme: "지킴", q: "내가 아끼는 사람을 누군가 위협한다.", o: [
+      ["아무도 모르는 곳으로 그 사람을 먼저 피신시킨다.", { ryoshu: 3 }],
+      ["내 몸을 던져서라도 막는다.", { araya: 2, ren: 2 }],
+      ["위협한 쪽을 끝까지 찾아가 갚아 준다.", { matt: 2, val: 2 }],
+      ["그 사람을 내 곁에 붙잡아 두고 어디에도 못 가게 한다.", { rien: 2, albina: 2 }],
+      ["믿을 만한 사람에게 먼저 도움을 구한다.", { sora: 2, lucio: 1, kira: 1 }]
+    ]},
+    { type: "pick", theme: "그때", q: "오래된 사진첩을 펼쳤다.", o: [
+      ["잘나가던 시절이 떠올라 한참을 들여다본다.", { val: 3, call: 1 }],
+      ["그때로 돌아가고 싶다. 그때는 자유로웠다.", { yoru: 3 }],
+      ["금방 덮는다. 지난 일보다 지금이 중요하다.", { ren: 2, albina: 1, kira: 1 }],
+      ["함께 찍힌 사람이 그리워진다.", { araya: 2, rien: 2 }],
+      ["기억나지 않는 사진이 있어도 괜찮다. 남은 마음이면 충분하다.", { ryoshu: 3 }]
+    ]}
+  ];
+
+  // 문항 하나가 인물에게 줄 수 있는 점수 범위
+  function contrib(qq, choice, id) {
+    return qq.o[choice][1][id] || 0;
+  }
+  function choiceCount(qq) { return qq.o.length; }
+  var MAX = {}, MIN = {};
+  ORDER.forEach(function (id) {
+    MAX[id] = 0; MIN[id] = 0;
+    QUESTIONS.forEach(function (qq) {
+      var hi = -Infinity, lo = Infinity;
+      for (var c = 0; c < choiceCount(qq); c++) { var v = contrib(qq, c, id); if (v > hi) hi = v; if (v < lo) lo = v; }
+      MAX[id] += hi; MIN[id] += lo;
+    });
+  });
+
+  var $ = function (id) { return document.getElementById(id); };
+  var answers = [];
+  var current = 0;
+
+  function show(sec) {
+    ["intro", "quiz", "result"].forEach(function (s) { $(s).hidden = s !== sec; });
+  }
+  function pad(n) { return (n < 10 ? "0" : "") + n; }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+
+  /* ---------- 거미줄 캔버스: 바큇살 12개는 인물, 동심 실은 질문 ---------- */
+  var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var cv = $("web"), ctx = cv.getContext("2d");
+  var webFill = 0, webTarget = 0, webTint = null;
+
+  function cssVar(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+  function resolveColor(c) { var m = /var\((--[^)]+)\)/.exec(c || ""); return m ? cssVar(m[1]) : c; }
+
+  function ringPath(cx, cy, rad, spokes, upto) {
+    ctx.beginPath();
+    for (var k = 0; k <= upto; k++) {
+      var ang = -Math.PI / 2 + k * 2 * Math.PI / spokes;
+      var x = cx + rad * Math.cos(ang), y = cy + rad * Math.sin(ang);
+      if (k === 0) { ctx.moveTo(x, y); continue; }
+      var mid = ang - Math.PI / spokes, sag = rad * 0.94;
+      ctx.quadraticCurveTo(cx + sag * Math.cos(mid), cy + sag * Math.sin(mid), x, y);
+    }
+    ctx.stroke();
+  }
+
+  function drawWeb() {
+    var W = cv.width, H = cv.height, cx = W / 2, cy = H / 2, R = W * 0.46;
+    var spokes = ORDER.length, rings = QUESTIONS.length;
+    ctx.clearRect(0, 0, W, H);
+    var thread = cssVar("--thread") || "#9195a8";
+    var gold = webTint ? resolveColor(webTint) : (cssVar("--gold") || "#c9a45c");
+    var line = cssVar("--line") || "#2c2f3d";
+
+    ctx.lineWidth = 1.2; ctx.strokeStyle = line;
+    for (var s = 0; s < spokes; s++) {
+      var a = -Math.PI / 2 + s * 2 * Math.PI / spokes;
+      ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + R * Math.cos(a), cy + R * Math.sin(a)); ctx.stroke();
+    }
+    var whole = Math.floor(webFill), frac = webFill - whole;
+    for (var r = 1; r <= rings; r++) {
+      var rad = R * (0.12 + 0.88 * r / rings);
+      var filled = r <= whole;
+      ctx.strokeStyle = filled ? gold : line;
+      ctx.lineWidth = filled ? 1.8 : 1;
+      ringPath(cx, cy, rad, spokes, spokes);
+      if (!filled && r === whole + 1 && frac > 0) {
+        ctx.strokeStyle = gold; ctx.lineWidth = 1.8;
+        ringPath(cx, cy, rad, spokes, Math.max(1, Math.round(spokes * frac)));
+      }
+    }
+    ctx.fillStyle = webFill >= rings ? gold : thread;
+    ctx.beginPath(); ctx.arc(cx, cy, 7, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx, cy - 11, 4.5, 0, Math.PI * 2); ctx.fill();
+  }
+
+  function animateWeb() {
+    if (reduceMotion) { webFill = webTarget; drawWeb(); return; }
+    var step = function () {
+      var d = webTarget - webFill;
+      if (Math.abs(d) < 0.01) { webFill = webTarget; drawWeb(); return; }
+      webFill += d * 0.18; drawWeb(); requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+
+  /* ---------- 인물 미리보기 ---------- */
+  function renderCast() {
+    $("cast").innerHTML = '<p class="cast-h" style="margin:0">등장 인물 · 눌러서 미리 보기</p>' + GROUPS.map(function (g) {
+      return '<div><p class="cast-h">' + g.label + '</p><div class="cast-grid' + (g.ids.length === 2 ? " two" : "") + '">' +
+        g.ids.map(function (id) {
+          var c = CHARS[id];
+          return '<button type="button" class="chip" id="chip-' + id + '" data-id="' + id + '" style="--fc:' + c.color + '">' +
+            '<small>' + esc(c.chip) + '</small><span>' + esc(c.name) + '</span></button>';
+        }).join("") + '</div></div>';
+    }).join("");
+    $("cast").addEventListener("click", function (e) {
+      var b = e.target.closest(".chip"); if (!b) return;
+      renderResult(b.getAttribute("data-id"), null);
+    });
+  }
+
+  /* ---------- 질문 ---------- */
+  function renderQuestion() {
+    var qq = QUESTIONS[current];
+    $("qNum").textContent = pad(current + 1);
+    $("qTotal").textContent = QUESTIONS.length;
+    $("qTheme").textContent = qq.theme;
+    $("barFill").style.width = (current / QUESTIONS.length * 100) + "%";
+    $("topState").innerHTML = "<b>진행</b> · " + pad(current + 1) + "번째 실";
+    var keys = "ABCDE";
+    var html = '<h2 class="qtext fade-in">' + esc(qq.q) + '</h2><div class="opts" role="group" aria-label="보기">';
+    qq.o.forEach(function (op, i) {
+      var picked = answers[current] === i ? " picked" : "";
+      html += '<button type="button" class="opt' + picked + '" id="opt-' + current + '-' + i + '" data-i="' + i + '" data-k="' + keys[i] + '">' + esc(op[0]) + '</button>';
+    });
+    html += "</div>";
+    $("qBody").innerHTML = html;
+    $("backBtn").style.visibility = current === 0 ? "hidden" : "visible";
+    webTarget = current; animateWeb();
+    var first = $("qBody").querySelector(".opt");
+    if (first) first.focus({ preventScroll: true });
+  }
+
+  $("qBody").addEventListener("click", function (e) {
+    var b = e.target.closest(".opt"); if (!b) return;
+    answers[current] = Number(b.getAttribute("data-i"));
+    if (current < QUESTIONS.length - 1) { current++; renderQuestion(); }
+    else { finish(); }
+  });
+
+  document.addEventListener("keydown", function (e) {
+    if ($("quiz").hidden) return;
+    var idx = "12345".indexOf(e.key);
+    if (idx < 0) idx = "abcde".indexOf(String(e.key).toLowerCase());
+    var opts = $("qBody").querySelectorAll(".opt");
+    if (idx >= 0 && idx < opts.length) opts[idx].click();
+  });
+
+  function startQuiz() { answers = []; current = 0; webTint = null; show("quiz"); renderQuestion(); }
+  $("startBtn").addEventListener("click", startQuiz);
+  $("backBtn").addEventListener("click", function () { if (current > 0) { current--; renderQuestion(); } });
+  $("quitBtn").addEventListener("click", goHome);
+
+  function goHome() {
+    webTint = null; webTarget = 0; animateWeb();
+    $("topState").innerHTML = "<b>대기</b> · 복도 입구";
+    show("intro"); window.scrollTo(0, 0);
+  }
+
+  function score() {
+    var raw = {};
+    ORDER.forEach(function (id) { raw[id] = 0; });
+    answers.forEach(function (ai, qi) {
+      ORDER.forEach(function (id) { raw[id] += contrib(QUESTIONS[qi], ai, id); });
+    });
+    return ORDER.map(function (id) {
+      var span = MAX[id] - MIN[id];
+      return { id: id, pct: span ? Math.round((raw[id] - MIN[id]) / span * 100) : 0, raw: raw[id] };
+    }).sort(function (a, b) { return b.pct - a.pct || b.raw - a.raw; });
+  }
+
+  function finish() { renderResult(null, score()); }
+
+  /* ---------- 결과 ---------- */
+  function renderResult(id, ranking) {
+    if (ranking) id = ranking[0].id;
+    var c = CHARS[id], p = CHARS[c.pair];
+    webTint = c.color; webTarget = QUESTIONS.length; animateWeb();
+    $("topState").innerHTML = ranking ? "<b>완성</b> · 문이 열렸습니다" : "<b>열람</b> · 인물 기록";
+
+    var html = '<article class="result-door fade-in" style="--rc:' + c.color + '">';
+    html += '<p class="eyebrow">' + (ranking ? "당신과 가장 닮은 인물" : "인물 기록") + '</p>';
+    html += '<h2 class="rname">' + esc(c.name) + '</h2>';
+    html += '<div class="rrole">' + esc(c.role) + '</div>';
+    html += '<p class="rtag">' + esc(c.tag) + '</p>';
+    html += '<div class="mind"><p class="eyebrow">' + (ranking ? "당신과 닮은 마음" : "이 사람의 마음") + '</p><p>' + esc(c.mind) + '</p></div>';
+    html += '<p class="rsummary">' + esc(c.summary) + '</p>';
+
+    html += '<div class="cols"><div><h3 class="section-h">성격</h3><ul class="list">' +
+      c.traits.map(function (t) { return "<li>" + esc(t) + "</li>"; }).join("") + '</ul></div>';
+    html += '<div><h3 class="section-h">취향</h3><ul class="list">' +
+      c.tastes.map(function (t) { return "<li>" + esc(t) + "</li>"; }).join("") + '</ul></div></div>';
+
+    html += '<table class="facts-table"><tbody>' +
+      '<tr><th scope="row">머무는 곳</th><td>' + esc(c.place) + '</td></tr>' +
+      '<tr><th scope="row">무장</th><td>' + esc(c.weapon) + '</td></tr>' +
+      '<tr><th scope="row">손가락의 가치</th><td>' + c.virtue + '</td></tr>' +
+      '</tbody></table>';
+
+    html += '<div class="pair" style="--pc:' + p.color + '"><div class="knot">' + esc(p.name.charAt(0)) + '</div>' +
+      '<p>' + esc(c.pairLabel) + '는 <b>' + esc(p.name) + '</b>입니다. ' + esc(p.tag) + '.</p></div>';
+
+    html += '<details class="spoiler"><summary>9장 결말 보기 (스포일러)</summary><p>' + esc(c.spoiler) + '</p></details>';
+    html += '</article>';
+
+    if (ranking) {
+      html += '<section class="match"><h3 class="section-h">닮은 정도</h3>';
+      ranking.forEach(function (r, i) {
+        var cc = CHARS[r.id];
+        html += '<div class="mrow' + (i === 0 ? " top" : "") + '"><span class="nm">' + esc(cc.name) +
+          '<small>' + esc(cc.chip) + '</small></span>' +
+          '<span class="mtrack"><i style="width:' + r.pct + '%;background:' + cc.color + '"></i></span>' +
+          '<span class="pc">' + r.pct + '%</span></div>';
+      });
+      html += '</section>';
+    }
+
+    html += '<div class="actions center">';
+    if (ranking) html += '<button class="btn" type="button" id="copyBtn">결과 복사하기</button>';
+    html += '<button class="btn ghost" type="button" id="retryBtn">' + (ranking ? "다시 하기" : "테스트 시작하기") + '</button>';
+    html += '<button class="btn ghost" type="button" id="homeBtn">처음으로</button></div>';
+    html += '<div class="toast" id="toast" role="status"></div>';
+
+    $("result").innerHTML = html;
+    show("result"); window.scrollTo(0, 0);
+
+    $("retryBtn").addEventListener("click", startQuiz);
+    $("homeBtn").addEventListener("click", goHome);
+    if (ranking) {
+      $("copyBtn").addEventListener("click", function () {
+        var second = CHARS[ranking[1].id];
+        var text = "[거미집 인물 테스트] 나와 가장 닮은 인물은 " + c.name + " (" + c.role + ", " + ranking[0].pct + "%)\n" +
+          c.tag + "\n두 번째로 닮은 인물: " + second.name + " (" + ranking[1].pct + "%)";
+        var done = function () { $("toast").textContent = "결과를 복사했습니다."; };
+        var fallback = function () {
+          var ta = $("copyFallback");
+          if (!ta) {
+            ta = document.createElement("textarea"); ta.id = "copyFallback"; ta.rows = 3; ta.readOnly = true;
+            $("toast").after(ta);
+          }
+          ta.value = text; ta.focus(); ta.select();
+          $("toast").textContent = "자동 복사가 막혀 있습니다. 아래 글을 직접 복사해 주세요.";
+        };
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, fallback);
+          else fallback();
+        } catch (err) { fallback(); }
+      });
+    }
+  }
+
+  renderCast();
+  drawWeb();
+})();
+</script>
